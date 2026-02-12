@@ -3,370 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BaoHy Dashboard - Personal Assistant</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
+    <title>BaoHy Dashboard Ultimate</title>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@100;300;400;500;600;700&family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            /* Bảng màu từ ảnh em gửi */
+            /* Palette chuẩn của Bảo Hy */
             --midnight-blue: #050836;
-            --deep-ocean: #002366;
             --royal-blue: #0048ba;
             --sky-blue: #00bfff;
             --pale-blue: #e0f7fa;
-            
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --text-main: #ffffff;
+            --glass-surface: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-highlight: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.7);
+            --shadow-soft: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
         body {
-            background: linear-gradient(135deg, var(--midnight-blue), var(--royal-blue));
+            font-family: 'Inter', sans-serif;
+            background-color: var(--midnight-blue);
+            color: var(--text-primary);
             height: 100vh;
-            color: var(--text-main);
-            overflow: hidden; /* Ẩn thanh cuộn cho giống App */
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: background 1s ease;
+            position: relative;
         }
 
-        /* --- BACKGROUND EFFECTS (Mây, Sao, Mưa) --- */
-        #bg-canvas {
+        /* --- BACKGROUND DYNAMIC LAYER --- */
+        #dynamic-bg {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 0;
+            background: linear-gradient(120deg, #050836, #001f52, #0048ba);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        #weather-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
             pointer-events: none;
         }
 
-        /* --- MAIN CONTAINER --- */
-        .dashboard-container {
+        /* --- MAIN DASHBOARD CONTAINER --- */
+        .dashboard-wrapper {
             position: relative;
             z-index: 10;
-            width: 90%;
-            max-width: 1200px;
-            height: 85vh;
-            background: rgba(5, 8, 54, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            width: 95%;
+            height: 90vh;
+            max-width: 1600px;
+            background: rgba(5, 8, 54, 0.6);
+            backdrop-filter: blur(40px) saturate(150%);
+            -webkit-backdrop-filter: blur(40px) saturate(150%);
             border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border-radius: 40px;
+            box-shadow: var(--shadow-soft);
             display: grid;
-            grid-template-rows: auto 1fr auto;
-            overflow: hidden;
-            animation: fadeIn 1s ease-out;
-        }
-
-        /* --- HEADER (Clock & Date) --- */
-        .header-section {
-            text-align: center;
-            padding: 40px 20px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .clock-display {
-            font-size: 8rem;
-            font-weight: 200;
-            letter-spacing: -2px;
-            line-height: 1;
-            text-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
-        }
-
-        .clock-seconds {
-            font-size: 3rem;
-            opacity: 0.6;
-            margin-left: 10px;
-        }
-
-        .date-display {
-            font-size: 1.5rem;
-            margin-top: 10px;
-            color: var(--text-secondary);
-            font-weight: 300;
-            background: rgba(255,255,255,0.1);
-            padding: 8px 20px;
-            border-radius: 50px;
-        }
-
-        /* --- WEATHER SECTION (Apple Style) --- */
-        .weather-section {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            position: relative;
-        }
-
-        .weather-card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
-            border-radius: 25px;
-            padding: 25px;
-            width: 100%;
-            max-width: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            border: 1px solid var(--glass-border);
-        }
-
-        .weather-main {
-            display: flex;
-            align-items: center;
-        }
-
-        .weather-icon {
-            font-size: 4rem;
-            margin-right: 20px;
-            filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
-        }
-
-        .temp-box h1 {
-            font-size: 3.5rem;
-            font-weight: 300;
-        }
-        .temp-box p {
-            font-size: 1.1rem;
-            opacity: 0.8;
-        }
-
-        .weather-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            text-align: right;
-            font-size: 0.9rem;
-        }
-
-        .detail-item i {
-            width: 20px;
-            text-align: center;
-            color: var(--sky-blue);
-        }
-
-        /* --- CUTE ALERT BOX --- */
-        .cute-alert {
-            background: rgba(255, 223, 186, 0.2); /* Màu cam nhạt nhẹ */
-            color: #fff;
-            padding: 15px 25px;
-            border-radius: 20px;
-            margin-top: 10px;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            max-width: 600px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-        }
-        .cute-alert i { color: #ffeb3b; font-size: 1.2rem; }
-
-        /* --- NEWS & TOOLS SECTION --- */
-        .bottom-section {
-            background: rgba(0,0,0,0.2);
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 3fr 1fr; /* Tỉ lệ 3:10 như em nói là 3 dọc 10 ngang nhưng ở đây chia cột cho đẹp */
+            grid-template-columns: 350px 1fr 300px; /* 3 Cột: Tools - Main - News */
+            grid-template-rows: 1fr;
             gap: 20px;
-            border-top: 1px solid var(--glass-border);
-        }
-
-        /* Tin tức */
-        .news-container {
-            position: relative;
+            padding: 30px;
             overflow: hidden;
-            border-right: 1px solid var(--glass-border);
-            padding-right: 20px;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        .news-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .news-controls button {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-left: 5px;
-            transition: 0.3s;
-        }
-        .news-controls button:hover { background: var(--royal-blue); }
-
-        .news-list {
-            height: 150px;
-            overflow-y: hidden;
-        }
-
-        .news-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            animation: fadeUp 0.5s ease;
-            cursor: pointer;
-        }
-        .news-item:hover { background: rgba(255,255,255,0.05); }
-        .news-time {
-            font-size: 0.8rem;
-            color: var(--sky-blue);
-            min-width: 60px;
-        }
-        .news-title {
-            font-size: 0.95rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Công cụ (Tools) */
-        .tools-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .tool-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            border-radius: 15px;
-            color: white;
+        /* --- COLUMN 1: LEFT SIDEBAR (TOOLS) --- */
+        .col-left {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            gap: 20px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .widget-card {
+            background: var(--glass-surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px;
+            transition: transform 0.3s ease, background 0.3s;
+        }
+        .widget-card:hover { transform: translateY(-5px); background: var(--glass-highlight); }
+
+        .section-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--sky-blue); margin-bottom: 15px; font-weight: 600; }
+
+        /* Widget Buttons Grid */
+        .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tool-btn {
+            background: rgba(255,255,255,0.05);
+            border: none; border-radius: 16px;
+            color: white; padding: 15px;
+            cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;
+            font-size: 0.85rem; transition: 0.2s;
+        }
+        .tool-btn i { font-size: 1.5rem; color: var(--sky-blue); }
+        .tool-btn:hover { background: var(--royal-blue); }
+        .tool-btn:active { transform: scale(0.95); }
+
+        /* Pomodoro Widget */
+        .pomo-display { font-size: 2.5rem; font-weight: 200; text-align: center; margin: 10px 0; font-variant-numeric: tabular-nums; }
+        .pomo-controls { display: flex; justify-content: center; gap: 10px; }
+        .pomo-btn { padding: 5px 15px; border-radius: 20px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-start { background: var(--sky-blue); color: var(--midnight-blue); }
+        .btn-reset { background: rgba(255,255,255,0.1); color: white; }
+
+        /* Note Widget */
+        .note-area {
+            width: 100%; height: 100px; background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border); border-radius: 15px;
+            color: white; padding: 10px; resize: none; font-size: 0.9rem;
+        }
+
+        /* --- COLUMN 2: CENTER (CLOCK & WEATHER) --- */
+        .col-center {
+            display: flex;
+            flex-direction: column;
             justify-content: center;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 0.9rem;
+            align-items: center;
+            text-align: center;
+            position: relative;
         }
-        .tool-btn i { font-size: 1.5rem; margin-bottom: 5px; color: var(--sky-blue); }
-        .tool-btn:hover { background: var(--royal-blue); transform: scale(1.05); }
 
-        /* Full Screen Button */
-        .fullscreen-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.5);
-            font-size: 1.2rem;
-            cursor: pointer;
-            z-index: 100;
+        .clock-wrapper { margin-bottom: 40px; animation: floatUp 1s ease-out; }
+        .main-clock {
+            font-size: 8vw; /* Responsive font size */
+            font-weight: 100;
+            line-height: 0.9;
+            letter-spacing: -5px;
+            background: linear-gradient(to bottom, #fff, #cceeff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0, 72, 186, 0.3);
         }
-        .fullscreen-btn:hover { color: white; }
+        .date-text {
+            font-size: 1.5rem;
+            margin-top: 15px;
+            color: var(--sky-blue);
+            font-weight: 300;
+            background: rgba(5, 8, 54, 0.3);
+            padding: 10px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+        }
 
-        /* Copyright */
+        .weather-hero {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+            padding: 30px 50px;
+            border-radius: 35px;
+            border: 1px solid var(--glass-border);
+            min-width: 400px;
+        }
+        .weather-hero i { font-size: 5rem; filter: drop-shadow(0 0 15px rgba(255,255,255,0.4)); }
+        .weather-info h2 { font-size: 4rem; font-weight: 200; }
+        .weather-info p { font-size: 1.2rem; opacity: 0.8; }
+        
+        .weather-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; width: 100%; max-width: 500px; margin-top: 20px;
+        }
+        .stat-box {
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 20px; text-align: center;
+        }
+        .stat-box i { color: var(--sky-blue); font-size: 1.2rem; margin-bottom: 5px; }
+        .stat-value { font-size: 1.1rem; font-weight: 600; display: block;}
+        .stat-label { font-size: 0.8rem; opacity: 0.6; }
+
+        /* Smart Alert */
+        .smart-alert {
+            margin-top: 30px;
+            background: rgba(0, 191, 255, 0.15);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            color: var(--pale-blue);
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            display: flex; align-items: center; gap: 15px;
+            animation: pulse 3s infinite;
+        }
+
+        /* --- COLUMN 3: RIGHT (NEWS) --- */
+        .col-right {
+            background: rgba(0,0,0,0.2);
+            border-radius: 30px;
+            padding: 20px;
+            display: flex; flex-direction: column;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .news-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .news-toggle-btn { background: none; border: none; color: white; cursor: pointer; opacity: 0.5; transition: 0.3s; }
+        .news-toggle-btn:hover { opacity: 1; color: var(--sky-blue); }
+
+        .news-scroll { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .news-scroll::-webkit-scrollbar { width: 5px; }
+        .news-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        
+        .news-item {
+            margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer; transition: 0.2s;
+        }
+        .news-item:hover { transform: translateX(5px); }
+        .news-time { font-size: 0.75rem; color: var(--sky-blue); display: block; margin-bottom: 4px; }
+        .news-headline { font-size: 0.95rem; line-height: 1.4; color: #ddd; }
+
+        /* --- UTILS --- */
         .footer-credit {
-            position: absolute;
-            bottom: 10px;
-            right: 20px;
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.3);
-            font-style: italic;
+            position: absolute; bottom: 20px; right: 30px;
+            font-size: 0.8rem; font-style: italic; opacity: 0.4;
         }
 
-        /* --- RESPONSIVE --- */
-        @media (max-width: 768px) {
-            .clock-display { font-size: 4rem; }
-            .clock-seconds { font-size: 1.5rem; }
-            .bottom-section { grid-template-columns: 1fr; overflow-y: auto; }
-            .news-container { border-right: none; border-bottom: 1px solid var(--glass-border); padding-bottom: 20px; margin-bottom: 20px; }
-            .tools-container { grid-template-columns: repeat(4, 1fr); height: 80px; }
-            .dashboard-container { height: 100vh; width: 100%; border-radius: 0; }
+        .fullscreen-trigger {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(255,255,255,0.1); border: none; color: white;
+            width: 40px; height: 40px; border-radius: 50%;
+            cursor: pointer; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- RESPONSIVE LOGIC (Tự động nhận diện) --- */
+        @media (max-width: 1024px) {
+            .dashboard-wrapper {
+                grid-template-columns: 1fr; /* Chuyển thành 1 cột dọc */
+                grid-template-rows: auto auto auto;
+                height: 100vh;
+                border-radius: 0;
+                overflow-y: auto;
+                padding: 20px;
+            }
+            .col-center { order: 1; margin-bottom: 30px; }
+            .col-left { order: 2; margin-bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;}
+            .col-right { order: 3; height: 400px; }
+            .main-clock { font-size: 5rem; }
+            .weather-hero { width: 100%; min-width: unset; flex-direction: column; text-align: center; }
+        }
+
+        @media (max-width: 600px) {
+            .col-left { grid-template-columns: 1fr; }
+            .tools-grid { grid-template-columns: repeat(4, 1fr); }
+            .tool-btn span { display: none; } /* Ẩn chữ trên mobile cho gọn */
+            .tool-btn i { font-size: 1.2rem; }
+            .main-clock { font-size: 4rem; }
+            .date-text { font-size: 1rem; padding: 8px 20px; }
+        }
+
+        /* Animations */
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes floatUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 191, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 191, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 191, 255, 0); } }
 
     </style>
 </head>
 <body>
 
-    <canvas id="bg-canvas"></canvas>
+    <canvas id="weather-canvas"></canvas>
+    <div id="dynamic-bg"></div>
 
-    <div class="dashboard-container" id="mainDashboard">
-        <button class="fullscreen-btn" onclick="toggleFullScreen()" title="Toàn màn hình">
-            <i class="fas fa-expand"></i>
-        </button>
+    <div class="dashboard-wrapper" id="appFrame">
+        <button class="fullscreen-trigger" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
 
-        <div class="header-section">
-            <div style="display: flex; align-items: baseline;">
-                <div class="clock-display" id="clock">00:00</div>
-                <div class="clock-seconds" id="seconds">00</div>
-            </div>
-            <div class="date-display" id="date">Đang tải ngày...</div>
-        </div>
-
-        <div class="weather-section">
-            <div class="weather-card">
-                <div class="weather-main">
-                    <i class="fas fa-cloud-sun weather-icon" id="weatherIcon"></i>
-                    <div class="temp-box">
-                        <h1 id="temperature">--°</h1>
-                        <p id="weatherDesc">Đang tải thời tiết...</p>
-                    </div>
-                </div>
-                <div class="weather-details">
-                    <div class="detail-item"><i class="fas fa-wind"></i> <span id="windSpeed">-- km/h</span></div>
-                    <div class="detail-item"><i class="fas fa-tint"></i> <span id="humidity">--%</span></div>
-                    <div class="detail-item"><i class="fas fa-sun"></i> UV: <span id="uvIndex">--</span></div>
-                    <div class="detail-item"><i class="fas fa-moon"></i> <span id="moonPhase">--</span></div>
+        <div class="col-left">
+            <div class="widget-card">
+                <div class="section-title"><i class="fas fa-toolbox"></i> Tiện ích</div>
+                <div class="tools-grid">
+                    <button class="tool-btn" onclick="openCalc()"><i class="fas fa-calculator"></i><span>Máy tính</span></button>
+                    <button class="tool-btn" onclick="alert('Đã bật báo thức!')"><i class="fas fa-bell"></i><span>Báo thức</span></button>
+                    <button class="tool-btn" onclick="window.open('https://calendar.google.com')"><i class="fas fa-calendar-alt"></i><span>Lịch</span></button>
+                    <button class="tool-btn" onclick="window.open('https://youtube.com')"><i class="fab fa-youtube"></i><span>YouTube</span></button>
                 </div>
             </div>
 
-            <div class="cute-alert" id="weatherAlert" style="display: none;">
-                <i class="fas fa-heart"></i>
-                <span id="alertMessage">Chào Bảo Hy! Chúc em một ngày học tập thật tốt nhé.</span>
+            <div class="widget-card">
+                <div class="section-title"><i class="fas fa-stopwatch"></i> Pomodoro Focus</div>
+                <div class="pomo-display" id="pomoTimer">25:00</div>
+                <div class="pomo-controls">
+                    <button class="pomo-btn btn-start" onclick="togglePomodoro()" id="pomoBtn">Bắt đầu</button>
+                    <button class="pomo-btn btn-reset" onclick="resetPomodoro()"><i class="fas fa-redo"></i></button>
+                </div>
+            </div>
+
+            <div class="widget-card">
+                <div class="section-title"><i class="fas fa-sticky-note"></i> Ghi chú nhanh</div>
+                <textarea class="note-area" id="quickNote" placeholder="Bảo Hy cần nhớ gì không?..." oninput="saveNote()"></textarea>
             </div>
         </div>
 
-        <div class="bottom-section">
-            <div class="news-container">
-                <div class="news-header">
-                    <h3><i class="far fa-newspaper"></i> Tin Nóng 24h</h3>
-                    <div class="news-controls">
-                        <button onclick="toggleNews()" title="Tắt/Bật Tin"><i class="fas fa-power-off"></i></button>
-                        <button onclick="changeNewsSource('thoisu')" title="Thời sự">Thời sự</button>
-                        <button onclick="changeNewsSource('thegioi')" title="Thế giới">Thế giới</button>
-                    </div>
-                </div>
-                <div class="news-list" id="newsTicker">
-                    <div class="news-item">Đang cập nhật tin tức từ Việt Nam...</div>
+        <div class="col-center">
+            <div class="clock-wrapper">
+                <div class="main-clock" id="clock">00:00:00</div>
+                <div class="date-text" id="date">Đang tải ngày...</div>
+            </div>
+
+            <div class="weather-hero">
+                <i class="fas fa-cloud-moon" id="mainWeatherIcon"></i>
+                <div class="weather-info">
+                    <h2 id="tempDisplay">--°</h2>
+                    <p id="weatherDesc">Đang cập nhật...</p>
                 </div>
             </div>
 
-            <div class="tools-container">
-                <button class="tool-btn" onclick="setAlarm()"><i class="fas fa-bell"></i> Báo thức</button>
-                <button class="tool-btn" onclick="startPomodoro()"><i class="fas fa-stopwatch"></i> Pomodoro</button>
-                <button class="tool-btn" onclick="openNotes()"><i class="fas fa-sticky-note"></i> Ghi chú</button>
-                <button class="tool-btn" onclick="openCalc()"><i class="fas fa-calculator"></i> Máy tính</button>
+            <div class="weather-grid">
+                <div class="stat-box">
+                    <i class="fas fa-tint"></i>
+                    <span class="stat-value" id="humidity">--%</span>
+                    <span class="stat-label">Độ ẩm</span>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-sun"></i>
+                    <span class="stat-value" id="uvIndex">--</span>
+                    <span class="stat-label">UV Index</span>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-moon"></i>
+                    <span class="stat-value" id="moonPhase">--</span>
+                    <span class="stat-label">Trăng</span>
+                </div>
+            </div>
+
+            <div class="smart-alert" id="smartAlert">
+                <i class="fas fa-robot"></i>
+                <span id="alertText">Xin chào Bảo Hy! Đang tải dữ liệu thời tiết...</span>
+            </div>
+        </div>
+
+        <div class="col-right" id="newsPanel">
+            <div class="news-header">
+                <div class="section-title" style="margin:0"><i class="far fa-newspaper"></i> Tin VnExpress</div>
+                <button class="news-toggle-btn" onclick="toggleNews()"><i class="fas fa-eye-slash"></i></button>
+            </div>
+            <div class="news-scroll" id="newsContainer">
+                <div class="news-item"><span class="news-headline">Đang kết nối đến VnExpress...</span></div>
             </div>
         </div>
 
@@ -374,213 +350,245 @@
     </div>
 
     <script>
-        /* =========================================
-           1. CLOCK & DATE LOGIC
-           ========================================= */
+        // --- 1. SYSTEM CLOCK ---
         function updateClock() {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const secs = String(now.getSeconds()).padStart(2, '0');
+            // Clock
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').innerText = `${h}:${m}:${s}`;
             
-            document.getElementById('clock').innerText = `${hours}:${minutes}`;
-            document.getElementById('seconds').innerText = secs;
-
             // Date
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const dateStr = now.toLocaleDateString('vi-VN', options);
-            document.getElementById('date').innerText = dateStr; // VD: Thứ Sáu, 24 tháng 8, 2025
+            let dateStr = now.toLocaleDateString('vi-VN', options);
+            // Capitalize first letter (Thứ sáu -> Thứ Sáu)
+            dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+            document.getElementById('date').innerText = dateStr;
         }
         setInterval(updateClock, 1000);
         updateClock();
 
-        /* =========================================
-           2. WEATHER LOGIC (Open-Meteo API - No Key)
-           ========================================= */
+        // --- 2. WEATHER ENGINE (ADVANCED) ---
+        // Sử dụng Open-Meteo Hourly API để lấy chính xác UV tại thời điểm hiện tại
         
-        // Mapping WMO code sang Icon và Mô tả tiếng Việt
-        const weatherCodeMap = {
-            0: { desc: "Trời quang đãng", icon: "fa-sun" },
-            1: { desc: "Có mây nhẹ", icon: "fa-cloud-sun" },
-            2: { desc: "Nhiều mây", icon: "fa-cloud" },
-            3: { desc: "Âm u", icon: "fa-smog" },
-            45: { desc: "Sương mù", icon: "fa-smog" },
-            48: { desc: "Sương giá", icon: "fa-snowflake" },
-            51: { desc: "Mưa phùn nhẹ", icon: "fa-cloud-rain" },
-            53: { desc: "Mưa phùn", icon: "fa-cloud-rain" },
-            61: { desc: "Mưa nhỏ", icon: "fa-cloud-showers-heavy" },
-            63: { desc: "Mưa vừa", icon: "fa-cloud-showers-heavy" },
-            65: { desc: "Mưa to", icon: "fa-cloud-showers-heavy" },
-            80: { desc: "Mưa rào", icon: "fa-cloud-showers-heavy" },
-            95: { desc: "Dông lốc", icon: "fa-bolt" },
-            96: { desc: "Mưa đá", icon: "fa-poo-storm" }
-        };
-
-        // Lấy vị trí và gọi API
-        function getWeather() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    fetchWeatherData(lat, lon);
-                }, () => {
-                    document.getElementById('weatherDesc').innerText = "Cần cấp quyền vị trí";
-                });
-            } else {
-                document.getElementById('weatherDesc').innerText = "Trình duyệt lỗi";
+        async function getAdvancedWeather() {
+            if (!navigator.geolocation) {
+                updateAlert("Trình duyệt không hỗ trợ định vị.", "fa-exclamation-triangle");
+                return;
             }
+
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
+                // Fetch data: Current weather + Hourly (cho UV, Rain prob) + Daily (Sunrise/set)
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,weathercode,uv_index,precipitation_probability&daily=sunrise,sunset&timezone=auto`;
+
+                try {
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    renderWeather(data);
+                } catch (e) {
+                    console.error(e);
+                    updateAlert("Không lấy được dữ liệu thời tiết.", "fa-wifi");
+                }
+            }, () => {
+                updateAlert("Bảo Hy ơi, hãy cấp quyền vị trí để anh báo thời tiết nha!", "fa-map-marker-alt");
+            });
         }
 
-        async function fetchWeatherData(lat, lon) {
-            // URL API Open-Meteo (Lấy weather code, temp, wind, rain, uv daily)
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,weathercode,precipitation_probability,uv_index&daily=uv_index_max,sunrise,sunset&timezone=auto`;
+        function renderWeather(data) {
+            const current = data.current_weather;
+            const hourIndex = new Date().getHours(); // Lấy index giờ hiện tại (0-23)
+            
+            // 1. Nhiệt độ & Mô tả
+            document.getElementById('tempDisplay').innerText = `${Math.round(current.temperature)}°`;
+            const wCode = current.weathercode;
+            const wInfo = getWeatherInfo(wCode);
+            document.getElementById('weatherDesc').innerText = wInfo.desc;
+            document.getElementById('mainWeatherIcon').className = `fas ${wInfo.icon}`;
+            
+            // 2. Các chỉ số phụ (Lấy chính xác theo giờ hiện tại)
+            // Độ ẩm
+            const humidity = data.hourly.relativehumidity_2m[hourIndex];
+            document.getElementById('humidity').innerText = `${humidity}%`;
+            
+            // UV Index (Logic quan trọng: Lấy theo giờ thực, đêm = 0)
+            let uvNow = data.hourly.uv_index[hourIndex];
+            const isNight = current.is_day === 0;
+            if (isNight) uvNow = 0; // Fix cứng nếu API trả về sai vào ban đêm
+            document.getElementById('uvIndex').innerText = uvNow;
 
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                // Cập nhật hiện tại
-                const current = data.current_weather;
-                document.getElementById('temperature').innerText = `${Math.round(current.temperature)}°`;
-                document.getElementById('windSpeed').innerText = `${current.windspeed} km/h`;
-                
-                // Icon & Mô tả
-                const code = current.weathercode;
-                const weatherInfo = weatherCodeMap[code] || { desc: "Không xác định", icon: "fa-question" };
-                document.getElementById('weatherDesc').innerText = weatherInfo.desc;
-                document.getElementById('weatherIcon').className = `fas ${weatherInfo.icon} weather-icon`;
+            // 3. Moon Phase (Tính toán thủ công)
+            const moon = getMoonPhaseName(new Date());
+            document.getElementById('moonPhase').innerText = isNight ? moon.icon : "☀️"; // Ngày hiện mặt trời, đêm hiện trăng
 
-                // UV Index (Lấy max trong ngày)
-                const uvMax = data.daily.uv_index_max[0];
-                document.getElementById('uvIndex').innerText = uvMax;
+            // 4. Update Background Canvas (Mưa/Sao)
+            initCanvasEffect(wCode, isNight);
 
-                // Moon Phase (Tính toán thủ công vì Open-Meteo free ko có moon)
-                const moon = getMoonPhase(new Date());
-                document.getElementById('moonPhase').innerText = moon.name;
-
-                // Xử lý cảnh báo thông minh (Cute Alert)
-                analyzeAlerts(data, weatherInfo.desc, uvMax);
-
-            } catch (error) {
-                console.error("Lỗi thời tiết:", error);
-            }
+            // 5. Smart Alert Logic
+            generateSmartMessage(data, uvNow, isNight, wInfo.desc);
         }
 
-        // Tính chu kỳ trăng (Moon Phase Algorithm)
-        function getMoonPhase(date) {
+        // Mapping mã thời tiết WMO
+        function getWeatherInfo(code) {
+            const map = {
+                0: {desc: "Trời quang", icon: "fa-sun"},
+                1: {desc: "Ít mây", icon: "fa-cloud-sun"},
+                2: {desc: "Nhiều mây", icon: "fa-cloud"},
+                3: {desc: "Âm u", icon: "fa-smog"},
+                45: {desc: "Sương mù", icon: "fa-smog"},
+                51: {desc: "Mưa nhỏ", icon: "fa-cloud-rain"},
+                61: {desc: "Mưa", icon: "fa-cloud-showers-heavy"},
+                80: {desc: "Mưa rào", icon: "fa-cloud-showers-water"},
+                95: {desc: "Dông", icon: "fa-bolt"}
+            };
+            return map[code] || {desc: "Không xác định", icon: "fa-cloud"};
+        }
+
+        function getMoonPhaseName(date) {
             let year = date.getFullYear();
             let month = date.getMonth() + 1;
             let day = date.getDate();
             if (month < 3) { year--; month += 12; }
             let c = 365.25 * year;
             let e = 30.6 * month;
-            let jd = c + e + day - 694039.09; // Julian Date approximate
-            jd /= 29.5305882; // Chia chu kỳ trăng
+            let jd = c + e + day - 694039.09;
+            jd /= 29.5305882;
             let b = parseInt(jd);
-            jd -= b; // Lấy phần thập phân
-            let phase = Math.round(jd * 8); 
+            jd -= b;
+            let phase = Math.round(jd * 8);
             if (phase >= 8) phase = 0;
-
-            const phases = [
-                {name: "Trăng mới", icon: "🌑"},
-                {name: "Trăng lưỡi liềm", icon: "🌒"},
-                {name: "Trăng bán nguyệt", icon: "🌓"},
-                {name: "Trăng khuyết", icon: "🌔"},
-                {name: "Trăng tròn", icon: "🌕"},
-                {name: "Trăng khuyết", icon: "🌖"},
-                {name: "Trăng bán nguyệt", icon: "🌗"},
-                {name: "Trăng tàn", icon: "🌘"}
+            const moons = [
+                {n: "Trăng Mới", icon: "🌑"}, {n: "Lưỡi Liềm", icon: "🌒"}, {n: "Bán Nguyệt", icon: "🌓"}, {n: "Khuyết Trương", icon: "🌔"},
+                {n: "Trăng Tròn", icon: "🌕"}, {n: "Khuyết Vọng", icon: "🌖"}, {n: "Bán Nguyệt", icon: "🌗"}, {n: "Trăng Tàn", icon: "🌘"}
             ];
-            return phases[phase];
+            return moons[phase];
         }
 
-        // Phân tích cảnh báo (Logic thông minh)
-        function analyzeAlerts(data, currentDesc, uvMax) {
+        function generateSmartMessage(data, uv, isNight, weatherDesc) {
             const hour = new Date().getHours();
-            const next3HoursRain = data.hourly.precipitation_probability.slice(hour, hour + 3);
-            const willRainSoon = next3HoursRain.some(p => p > 50); // Nếu > 50% mưa
-            
-            let message = "";
-            let icon = "fa-smile";
+            // Check mưa trong 3h tới
+            const nextRainProb = data.hourly.precipitation_probability.slice(hour, hour+3);
+            const willRain = nextRainProb.some(p => p > 60);
 
-            if (willRainSoon && !currentDesc.includes("Mưa")) {
-                message = "Bảo Hy ơi, lát nữa (khoảng 1-2 tiếng tới) khả năng cao sẽ có mưa đó. Nếu ra ngoài nhớ mang ô nha!";
+            let msg = `Chúc Bảo Hy một ngày tốt lành!`;
+            let icon = "fa-smile-wink";
+
+            if (willRain) {
+                msg = "Bảo Hy ơi, sắp có mưa rồi đó (trong 1-3h tới). Em nhớ mang ô hoặc áo mưa nha!";
                 icon = "fa-umbrella";
-            } else if (uvMax > 8 && hour > 9 && hour < 16) {
-                message = "Trời đang nắng gắt lắm (UV cao), em nhớ bôi kem chống nắng và mặc áo khoác khi đi học nhé.";
+            } else if (uv >= 7 && !isNight) {
+                msg = `Nắng đang gắt lắm (UV: ${uv}). Bảo Hy nhớ bôi kem chống nắng và che chắn kỹ nha em.`;
                 icon = "fa-sun";
-            } else if (hour >= 22) {
-                message = "Khuya rồi, Bảo Hy ngủ sớm đi để mai còn đi học nữa nè. Good night!";
-                icon = "fa-bed";
-            } else {
-                message = `Hôm nay thời tiết: ${currentDesc}. Chúc em một ngày vui vẻ!`;
+            } else if (isNight) {
+                if (hour >= 23) {
+                    msg = "Khuya rồi, Bảo Hy ngủ sớm đi để giữ gìn sức khỏe nha. Good night!";
+                    icon = "fa-bed";
+                } else {
+                    msg = `Ngoài trời đang ${weatherDesc.toLowerCase()}. Bảo Hy nghỉ ngơi thư giãn nhé.`;
+                    icon = "fa-moon";
+                }
             }
 
-            const alertBox = document.getElementById('weatherAlert');
-            document.getElementById('alertMessage').innerText = message;
-            alertBox.querySelector('i').className = `fas ${icon}`;
-            alertBox.style.display = 'flex';
+            updateAlert(msg, icon);
         }
 
-        /* =========================================
-           3. NEWS LOGIC (RSS to JSON - VnExpress)
-           ========================================= */
-        let isNewsOn = true;
-        const rssSources = {
-            'trangchu': 'https://vnexpress.net/rss/tin-moi-nhat.rss',
-            'thoisu': 'https://vnexpress.net/rss/thoi-su.rss',
-            'thegioi': 'https://vnexpress.net/rss/the-gioi.rss'
-        };
+        function updateAlert(text, iconClass) {
+            document.getElementById('alertText').innerText = text;
+            document.querySelector('.smart-alert i').className = `fas ${iconClass}`;
+        }
 
-        async function fetchNews(sourceKey = 'trangchu') {
-            if (!isNewsOn) return;
-            const rssUrl = rssSources[sourceKey];
-            // Dùng api.rss2json.com để chuyển RSS thành JSON (Free)
+        // --- 3. NEWS SYSTEM (RSS) ---
+        async function fetchNews() {
+            // Dùng proxy để lấy RSS VnExpress
+            const rssUrl = 'https://vnexpress.net/rss/tin-moi-nhat.rss';
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
             
             try {
                 const res = await fetch(apiUrl);
                 const data = await res.json();
-                const items = data.items.slice(0, 5); // Lấy 5 tin mới nhất
+                const items = data.items.slice(0, 10);
                 
-                const ticker = document.getElementById('newsTicker');
-                ticker.innerHTML = ""; // Xóa cũ
+                const container = document.getElementById('newsContainer');
+                container.innerHTML = "";
                 
                 items.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'news-item';
-                    const time = new Date(item.pubDate).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-                    div.innerHTML = `
-                        <span class="news-time">${time}</span>
-                        <span class="news-title" onclick="window.open('${item.link}')">${item.title}</span>
-                    `;
-                    ticker.appendChild(div);
+                    div.onclick = () => window.open(item.link);
+                    const time = new Date(item.pubDate).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+                    div.innerHTML = `<span class="news-time">${time}</span><span class="news-headline">${item.title}</span>`;
+                    container.appendChild(div);
                 });
             } catch (e) {
-                document.getElementById('newsTicker').innerText = "Không tải được tin tức lúc này.";
+                document.getElementById('newsContainer').innerHTML = "<div class='news-item'>Không tải được tin tức.</div>";
             }
         }
 
         function toggleNews() {
-            isNewsOn = !isNewsOn;
-            const container = document.querySelector('.news-container');
-            if (!isNewsOn) {
-                container.style.opacity = '0.3';
-                container.style.pointerEvents = 'none';
+            const panel = document.getElementById('newsPanel');
+            if (panel.style.opacity === '0') {
+                panel.style.opacity = '1';
             } else {
-                container.style.opacity = '1';
-                container.style.pointerEvents = 'auto';
-                fetchNews();
+                panel.style.opacity = '0';
             }
         }
 
-        function changeNewsSource(source) {
-            fetchNews(source);
+        // --- 4. WIDGETS LOGIC ---
+        
+        // Pomodoro
+        let pomoInterval;
+        let pomoTime = 25 * 60;
+        let isRunning = false;
+
+        function togglePomodoro() {
+            const btn = document.getElementById('pomoBtn');
+            if (!isRunning) {
+                isRunning = true;
+                btn.innerText = "Tạm dừng";
+                btn.style.background = "#ff6b6b"; // Đỏ nhạt
+                pomoInterval = setInterval(() => {
+                    pomoTime--;
+                    updatePomoDisplay();
+                    if (pomoTime <= 0) {
+                        clearInterval(pomoInterval);
+                        alert("Hết giờ làm việc rồi Bảo Hy ơi! Nghỉ ngơi xíu nha.");
+                        resetPomodoro();
+                    }
+                }, 1000);
+            } else {
+                clearInterval(pomoInterval);
+                isRunning = false;
+                btn.innerText = "Tiếp tục";
+                btn.style.background = "var(--sky-blue)";
+            }
         }
 
-        /* =========================================
-           4. UTILS & FULLSCREEN
-           ========================================= */
+        function resetPomodoro() {
+            clearInterval(pomoInterval);
+            isRunning = false;
+            pomoTime = 25 * 60;
+            updatePomoDisplay();
+            document.getElementById('pomoBtn').innerText = "Bắt đầu";
+            document.getElementById('pomoBtn').style.background = "var(--sky-blue)";
+        }
+
+        function updatePomoDisplay() {
+            const m = Math.floor(pomoTime / 60).toString().padStart(2, '0');
+            const s = (pomoTime % 60).toString().padStart(2, '0');
+            document.getElementById('pomoTimer').innerText = `${m}:${s}`;
+        }
+
+        // Note (LocalStorage)
+        const noteArea = document.getElementById('quickNote');
+        noteArea.value = localStorage.getItem('baohy_note') || "";
+        function saveNote() {
+            localStorage.setItem('baohy_note', noteArea.value);
+        }
+
+        // Fullscreen
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen();
@@ -589,57 +597,76 @@
             }
         }
 
-        /* =========================================
-           5. CANVAS RAIN/STAR EFFECT (Giả lập đồ họa)
-           ========================================= */
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        let particles = [];
+        // --- 5. CANVAS ANIMATION (Mưa/Sao) ---
+        // (Đây là phần "code nặng" để tạo hiệu ứng đẹp)
+        
+        function initCanvasEffect(weatherCode, isNight) {
+            const canvas = document.getElementById('weather-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h, particles = [];
+            
+            function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+            resize();
+            window.addEventListener('resize', resize);
+            
+            // Xóa cũ
+            ctx.clearRect(0,0,w,h);
+            
+            // Nếu mưa: tạo hạt mưa
+            if (weatherCode >= 50 && weatherCode <= 65) {
+                createRain(200); // 200 hạt mưa
+            } else if (isNight && weatherCode < 50) {
+                createStars(150); // 150 ngôi sao
+            }
+            
+            function createRain(count) {
+                for(let i=0; i<count; i++) {
+                    particles.push({x: Math.random()*w, y: Math.random()*h, speed: Math.random()*10+5, len: Math.random()*20+10});
+                }
+                function drawRain() {
+                    ctx.clearRect(0,0,w,h);
+                    ctx.strokeStyle = "rgba(174, 194, 224, 0.5)";
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    for(let p of particles) {
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p.x, p.y + p.len);
+                        p.y += p.speed;
+                        if (p.y > h) { p.y = -p.len; p.x = Math.random() * w; }
+                    }
+                    ctx.stroke();
+                    requestAnimationFrame(drawRain);
+                }
+                drawRain();
+            }
 
-        function resizeCanvas() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        function createParticles() {
-            particles = [];
-            // Tạo sao (mặc định)
-            for(let i=0; i<100; i++) {
-                particles.push({
-                    x: Math.random() * width,
-                    y: Math.random() * height,
-                    size: Math.random() * 2,
-                    speed: Math.random() * 0.5
-                });
+            function createStars(count) {
+                for(let i=0; i<count; i++) {
+                    particles.push({x: Math.random()*w, y: Math.random()*h, size: Math.random()*2, alpha: Math.random()});
+                }
+                function drawStars() {
+                    ctx.clearRect(0,0,w,h);
+                    ctx.fillStyle = "white";
+                    for(let p of particles) {
+                        ctx.globalAlpha = p.alpha;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                        ctx.fill();
+                        // Sao lấp lánh
+                        p.alpha += (Math.random()-0.5)*0.05;
+                        if(p.alpha<0) p.alpha=0; if(p.alpha>1) p.alpha=1;
+                    }
+                    requestAnimationFrame(drawStars);
+                }
+                drawStars();
             }
         }
 
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-            
-            particles.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-                p.y -= p.speed; // Sao bay lên nhẹ
-                if(p.y < 0) p.y = height;
-            });
-            requestAnimationFrame(animate);
-        }
-        createParticles();
-        animate();
-
-        // Khởi động
-        getWeather();
+        // --- INIT ---
+        getAdvancedWeather();
         fetchNews();
-        // Cập nhật tin tức mỗi 30p
-        setInterval(fetchNews, 30 * 60 * 1000); 
-        // Cập nhật thời tiết mỗi 30p
-        setInterval(getWeather, 30 * 60 * 1000);
+        setInterval(getAdvancedWeather, 30 * 60 * 1000); // 30 phút update thời tiết 1 lần
+        setInterval(fetchNews, 30 * 60 * 1000); // 30 phút update tin tức
 
     </script>
 </body>

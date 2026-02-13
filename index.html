@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BaoHy Monitor • Full Option</title>
+    <title>BaoHy Monitor • Clean Version</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -98,14 +98,14 @@
         .center-col { grid-row: 2/3; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
         .clock-huge {
-            font-size: 11vw; font-weight: 200; line-height: 1;
+            font-size: 13vw; font-weight: 200; line-height: 1;
             font-family: var(--font-num); letter-spacing: -4px;
             background: linear-gradient(180deg, #fff 30%, #94a3b8 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             margin-bottom: 10px; filter: drop-shadow(0 0 30px rgba(56, 189, 248, 0.2));
         }
-        .date-text { font-size: 1.1rem; color: var(--accent); margin-bottom: 5px; font-weight: 300; }
-        .lunar-pill { font-size: 0.85rem; color: var(--text-mute); font-family: var(--font-num); background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 20px; margin-bottom: 30px; }
+        /* Đã xóa phần Lunar Pill */
+        .date-text { font-size: 1.3rem; color: var(--accent); margin-bottom: 40px; font-weight: 300; letter-spacing: 1px; }
 
         .dock-bar {
             background: rgba(2, 6, 23, 0.8); border: 1px solid var(--glass-border);
@@ -174,8 +174,7 @@
         <main class="center-col">
             <div class="clock-huge" id="clock">00:00</div>
             <div class="date-text" id="date-solar">...</div>
-            <div class="lunar-pill" id="date-lunar">...</div>
-
+            
             <div class="dock-bar">
                 <div class="dock-icon" onclick="Alarm.open()">
                     <i class="fas fa-bell"></i>
@@ -271,7 +270,6 @@
                 osc.type = 'square';
                 gain.gain.value = 0.1;
                 osc.start(); 
-                // Kêu tít tít tít
                 gain.gain.setValueAtTime(0.1, ctx.currentTime);
                 gain.gain.setValueAtTime(0, ctx.currentTime + 0.1);
                 gain.gain.setValueAtTime(0.1, ctx.currentTime + 0.2);
@@ -316,11 +314,10 @@
             const s = String(now.getSeconds()).padStart(2,'0');
             document.getElementById('clock').innerText = `${h}:${m}:${s}`;
             
-            Alarm.check(h, m, s); // Check báo thức
+            Alarm.check(h, m, s);
 
             const days = ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
             document.getElementById('date-solar').innerText = `${days[now.getDay()]}, ngày ${now.getDate()} tháng ${now.getMonth()+1}`;
-            document.getElementById('date-lunar').innerText = `Âm lịch: ${now.getDate()>10?now.getDate()-10:25}/${now.getMonth()>1?now.getMonth()-1:12}`;
         }
         setInterval(tick, 1000); tick();
 
@@ -397,6 +394,22 @@
         n.addEventListener('input',()=>localStorage.setItem('bh_note',n.value));
 
         function toggleFull(){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen()}
+
+        // --- STARS ---
+        const cvs=document.createElement('canvas'); cvs.id='stars-canvas'; 
+        document.body.prepend(cvs);
+        const ctx=cvs.getContext('2d'); let w,h,stars=[];
+        function resize(){w=cvs.width=window.innerWidth;h=cvs.height=window.innerHeight;}
+        window.addEventListener('resize',resize); resize();
+        for(let i=0;i<80;i++)stars.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.5,a:Math.random()});
+        function loop(){
+            ctx.clearRect(0,0,w,h); ctx.fillStyle="white";
+            stars.forEach(s=>{
+                ctx.globalAlpha=s.a; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+                s.a+=(Math.random()-0.5)*0.03; if(s.a<0)s.a=0;if(s.a>0.8)s.a=0.8;
+            }); requestAnimationFrame(loop);
+        }
+        loop();
     </script>
 </body>
 </html>
